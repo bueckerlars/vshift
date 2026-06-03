@@ -1,7 +1,7 @@
 [project]
 name = "vshift"
 version = "0.1.0"
-description = "Add your description here"
+description = "Automatic FFmpeg-based video transcoder with Redis orchestration"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
