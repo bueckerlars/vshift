@@ -2,6 +2,9 @@ from functools import cached_property
 
 from vshift.application.common.application_context import ApplicationContext
 from vshift.application.server.use_cases.enqueue_job import EnqueueJob
+from vshift.application.server.use_cases.ensure_worker_capacity import (
+    EnsureWorkerCapacity,
+)
 from vshift.application.server.use_cases.match_profile import MatchProfile
 from vshift.application.server.use_cases.probe_input_file import ProbeInputFile
 from vshift.application.server.use_cases.recover_stale_jobs import RecoverStaleJobs
@@ -9,7 +12,9 @@ from vshift.application.server.use_cases.scan_input import ScanInputFolder
 from vshift.infrastructure.ffmpeg.media_prober import FfmpegMediaProber
 from vshift.infrastructure.ffmpeg.models import FfmpegPaths
 from vshift.infrastructure.filesystem.poll_file_scanner import PollFileScanner
+from vshift.infrastructure.kubernetes.worker_pod_launcher import K8sWorkerPodLauncher
 from vshift.infrastructure.redis.factory import RedisStores, create_redis_stores
+from vshift.ports.worker_pod_launcher import WorkerPodLauncher
 
 
 class ServerApplicationContext(ApplicationContext):
@@ -73,4 +78,17 @@ class ServerApplicationContext(ApplicationContext):
             stores.job_repository,
             stores.task_queue,
             stores.worker_registry,
+        )
+
+    @cached_property
+    def worker_pod_launcher(self) -> WorkerPodLauncher:
+        return K8sWorkerPodLauncher(self.settings)
+
+    @cached_property
+    def ensure_worker_capacity(self) -> EnsureWorkerCapacity:
+        stores = self.redis_stores
+        return EnsureWorkerCapacity(
+            self.settings,
+            stores.task_queue,
+            self.worker_pod_launcher,
         )

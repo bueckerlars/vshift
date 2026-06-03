@@ -1,0 +1,44 @@
+{{- if and .Values.storage.input.enabled (not .Values.storage.input.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "vshift.fullname" . }}-input
+  labels:
+    {{- include "vshift.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.storage.input.size }}
+---
+{{- end }}
+{{- if and .Values.storage.output.enabled (not .Values.storage.output.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "vshift.fullname" . }}-output
+  labels:
+    {{- include "vshift.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.storage.output.size }}
+---
+{{- end }}
+{{- if and .Values.storage.temp.enabled (not .Values.storage.temp.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "vshift.fullname" . }}-temp
+  labels:
+    {{- include "vshift.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.storage.temp.size }}
+{{- end }}

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: vshift
+description: Automatic FFmpeg-based video transcoder with Redis orchestration
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

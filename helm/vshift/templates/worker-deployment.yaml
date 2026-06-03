@@ -1,0 +1,68 @@
+{{- if .Values.worker.static.enabled }}
+{{- $inputClaim := default (printf "%s-input" (include "vshift.fullname" .)) .Values.storage.input.existingClaim }}
+{{- $outputClaim := default (printf "%s-output" (include "vshift.fullname" .)) .Values.storage.output.existingClaim }}
+{{- $tempClaim := default (printf "%s-temp" (include "vshift.fullname" .)) .Values.storage.temp.existingClaim }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vshift.fullname" . }}-worker
+  labels:
+    {{- include "vshift.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ .Values.worker.static.replicas }}
+  selector:
+    matchLabels:
+      {{- include "vshift.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        {{- include "vshift.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+    spec:
+      serviceAccountName: vshift-worker
+      containers:
+        - name: worker
+          image: {{ include "vshift.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["vshift-worker"]
+          env:
+            - name: VSHIFT__REDIS__HOST
+              value: {{ .Values.redis.host | quote }}
+            - name: VSHIFT__REDIS__PORT
+              value: {{ .Values.redis.port | quote }}
+            - name: VSHIFT__REDIS__PASSWORD
+              value: {{ .Values.redis.password | quote }}
+            - name: VSHIFT__REDIS__DATABASE
+              value: {{ .Values.redis.database | quote }}
+            - name: VSHIFT__CONFIG__FILE
+              value: {{ printf "%s/%s" .Values.config.mountPath .Values.config.fileName | quote }}
+            - name: VSHIFT__LOGGING__LEVEL
+              value: {{ .Values.logging.level | quote }}
+          volumeMounts:
+            - name: config
+              mountPath: {{ .Values.config.mountPath }}
+              readOnly: true
+            - name: input
+              mountPath: {{ .Values.storage.input.mountPath }}
+            - name: output
+              mountPath: {{ .Values.storage.output.mountPath }}
+            - name: temp
+              mountPath: {{ .Values.storage.temp.mountPath }}
+          resources:
+            {{- toYaml .Values.worker.static.resources | nindent 12 }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "vshift.fullname" . }}-config
+        - name: input
+          persistentVolumeClaim:
+            claimName: {{ $inputClaim }}
+        - name: output
+          persistentVolumeClaim:
+            claimName: {{ $outputClaim }}
+        - name: temp
+          persistentVolumeClaim:
+            claimName: {{ $tempClaim }}
+{{- end }}

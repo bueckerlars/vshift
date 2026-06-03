@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "vshift.fullname" . }}-config
+  labels:
+    {{- include "vshift.labels" . | nindent 4 }}
+data:
+  vshift.yaml: |
+{{ .Files.Get "config/vshift.yaml" | indent 4 }}

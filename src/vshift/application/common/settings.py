@@ -104,6 +104,28 @@ class ServerRuntimeSettings(BaseModel):
 
     scan_interval_seconds: PositiveInt = Field(default=30)
     recovery_interval_seconds: PositiveInt = Field(default=60)
+    worker_scale_interval_seconds: PositiveInt = Field(default=15)
+
+
+class KubernetesSettings(BaseModel):
+    """Kubernetes integration for dynamic worker Job pods."""
+
+    enabled: bool = Field(default=False)
+    namespace: str = Field(default="default", min_length=1)
+    in_cluster: bool = Field(default=True)
+    worker_image: str = Field(default="vshift:latest", min_length=1)
+    worker_image_pull_policy: str = Field(default="IfNotPresent")
+    max_concurrent_pods: PositiveInt = Field(default=5)
+    worker_service_account: str = Field(default="vshift-worker", min_length=1)
+    job_ttl_seconds_after_finished: PositiveInt = Field(default=3600)
+    input_volume_claim: str | None = Field(default=None)
+    output_volume_claim: str | None = Field(default=None)
+    temp_volume_claim: str | None = Field(default=None)
+    input_mount_path: str = Field(default="/data/input")
+    output_mount_path: str = Field(default="/data/output")
+    temp_mount_path: str = Field(default="/data/temp")
+    config_mount_path: str = Field(default="/app/config")
+    config_map_name: str | None = Field(default="vshift-config")
 
 
 class WorkerRuntimeSettings(BaseModel):
@@ -111,6 +133,10 @@ class WorkerRuntimeSettings(BaseModel):
 
     idle_sleep_seconds: PositiveInt = Field(default=1)
     claim_dequeue_timeout_seconds: PositiveInt = Field(default=5)
+    one_shot: bool = Field(
+        default=False,
+        description="Process a single job and exit (for Kubernetes Job pods)",
+    )
 
 
 class Settings(BaseSettings):
@@ -137,3 +163,4 @@ class Settings(BaseSettings):
     api: ApiSettings = Field(default_factory=ApiSettings)
     server: ServerRuntimeSettings = Field(default_factory=ServerRuntimeSettings)
     worker: WorkerRuntimeSettings = Field(default_factory=WorkerRuntimeSettings)
+    kubernetes: KubernetesSettings = Field(default_factory=KubernetesSettings)

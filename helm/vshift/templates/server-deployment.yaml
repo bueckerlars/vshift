@@ -1,0 +1,97 @@
+{{- $inputClaim := default (printf "%s-input" (include "vshift.fullname" .)) .Values.storage.input.existingClaim }}
+{{- $outputClaim := default (printf "%s-output" (include "vshift.fullname" .)) .Values.storage.output.existingClaim }}
+{{- $tempClaim := default (printf "%s-temp" (include "vshift.fullname" .)) .Values.storage.temp.existingClaim }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vshift.fullname" . }}-server
+  labels:
+    {{- include "vshift.labels" . | nindent 4 }}
+    app.kubernetes.io/component: server
+spec:
+  replicas: {{ .Values.server.replicas }}
+  selector:
+    matchLabels:
+      {{- include "vshift.serverSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "vshift.serverSelectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Values.server.serviceAccount.name }}
+      containers:
+        - name: server
+          image: {{ include "vshift.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["vshift-server"]
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: VSHIFT__REDIS__HOST
+              value: {{ .Values.redis.host | quote }}
+            - name: VSHIFT__REDIS__PORT
+              value: {{ .Values.redis.port | quote }}
+            - name: VSHIFT__REDIS__PASSWORD
+              value: {{ .Values.redis.password | quote }}
+            - name: VSHIFT__REDIS__DATABASE
+              value: {{ .Values.redis.database | quote }}
+            - name: VSHIFT__CONFIG__FILE
+              value: {{ printf "%s/%s" .Values.config.mountPath .Values.config.fileName | quote }}
+            - name: VSHIFT__LOGGING__LEVEL
+              value: {{ .Values.logging.level | quote }}
+            - name: VSHIFT__KUBERNETES__ENABLED
+              value: {{ .Values.worker.dynamic.enabled | quote }}
+            - name: VSHIFT__KUBERNETES__NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: VSHIFT__KUBERNETES__IN_CLUSTER
+              value: "true"
+            - name: VSHIFT__KUBERNETES__WORKER_IMAGE
+              value: {{ include "vshift.image" . | quote }}
+            - name: VSHIFT__KUBERNETES__MAX_CONCURRENT_PODS
+              value: {{ .Values.worker.dynamic.maxConcurrentPods | quote }}
+            - name: VSHIFT__KUBERNETES__WORKER_SERVICE_ACCOUNT
+              value: vshift-worker
+            - name: VSHIFT__KUBERNETES__CONFIG_MAP_NAME
+              value: {{ include "vshift.fullname" . }}-config
+            - name: VSHIFT__KUBERNETES__INPUT_VOLUME_CLAIM
+              value: {{ $inputClaim | quote }}
+            - name: VSHIFT__KUBERNETES__OUTPUT_VOLUME_CLAIM
+              value: {{ $outputClaim | quote }}
+            - name: VSHIFT__KUBERNETES__TEMP_VOLUME_CLAIM
+              value: {{ $tempClaim | quote }}
+            - name: VSHIFT__KUBERNETES__INPUT_MOUNT_PATH
+              value: {{ .Values.storage.input.mountPath | quote }}
+            - name: VSHIFT__KUBERNETES__OUTPUT_MOUNT_PATH
+              value: {{ .Values.storage.output.mountPath | quote }}
+            - name: VSHIFT__KUBERNETES__TEMP_MOUNT_PATH
+              value: {{ .Values.storage.temp.mountPath | quote }}
+            - name: VSHIFT__KUBERNETES__CONFIG_MOUNT_PATH
+              value: {{ .Values.config.mountPath | quote }}
+            - name: VSHIFT__KUBERNETES__JOB_TTL_SECONDS_AFTER_FINISHED
+              value: {{ .Values.worker.dynamic.ttlSecondsAfterFinished | quote }}
+          volumeMounts:
+            - name: config
+              mountPath: {{ .Values.config.mountPath }}
+              readOnly: true
+            - name: input
+              mountPath: {{ .Values.storage.input.mountPath }}
+            - name: output
+              mountPath: {{ .Values.storage.output.mountPath }}
+            - name: temp
+              mountPath: {{ .Values.storage.temp.mountPath }}
+          resources:
+            {{- toYaml .Values.server.resources | nindent 12 }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "vshift.fullname" . }}-config
+        - name: input
+          persistentVolumeClaim:
+            claimName: {{ $inputClaim }}
+        - name: output
+          persistentVolumeClaim:
+            claimName: {{ $outputClaim }}
+        - name: temp
+          persistentVolumeClaim:
+            claimName: {{ $tempClaim }}

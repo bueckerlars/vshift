@@ -22,8 +22,15 @@ def main() -> None:
     signal.signal(signal.SIGTERM, _handle_stop)
 
     context.register_worker.execute()
-    idle_sleep = context.settings.worker.idle_sleep_seconds
 
+    if context.settings.worker.one_shot:
+        logger.info("starting one-shot vshift worker {}", context.worker_id)
+        context.process_next_job.execute()
+        context.redis_stores.worker_registry.deregister(context.worker_id)
+        logger.info("one-shot worker {} finished", context.worker_id)
+        return
+
+    idle_sleep = context.settings.worker.idle_sleep_seconds
     logger.info("starting vshift worker {}", context.worker_id)
     while not stop_event.is_set():
         job = context.process_next_job.execute()

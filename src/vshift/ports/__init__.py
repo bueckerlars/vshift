@@ -7,6 +7,7 @@ from vshift.ports.processed_file_store import ProcessedFileStore
 from vshift.ports.profile_repository import ProfileRepository
 from vshift.ports.task_queue import TaskQueue
 from vshift.ports.transcoder import Transcoder
+from vshift.ports.worker_pod_launcher import WorkerPodLauncher
 from vshift.ports.worker_registry import WorkerRegistry
 
 __all__ = [
@@ -19,5 +20,6 @@ __all__ = [
     "ProfileRepository",
     "TaskQueue",
     "Transcoder",
+    "WorkerPodLauncher",
     "WorkerRegistry",
 ]

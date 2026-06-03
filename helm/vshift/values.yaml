@@ -1,0 +1,58 @@
+image:
+  repository: vshift
+  tag: latest
+  pullPolicy: IfNotPresent
+
+redis:
+  host: redis
+  port: 6379
+  password: vshift
+  database: 1
+
+server:
+  replicas: 1
+  serviceAccount:
+    create: true
+    name: vshift-server
+  resources: {}
+  service:
+    type: ClusterIP
+    port: 8000
+
+worker:
+  mode: dynamic
+  dynamic:
+    enabled: true
+    maxConcurrentPods: 5
+    ttlSecondsAfterFinished: 3600
+  static:
+    enabled: false
+    replicas: 0
+    resources: {}
+
+kubernetes:
+  namespace: default
+
+storage:
+  input:
+    enabled: true
+    size: 100Gi
+    mountPath: /data/input
+    existingClaim: ""
+  output:
+    enabled: true
+    size: 100Gi
+    mountPath: /data/output
+    existingClaim: ""
+  temp:
+    enabled: true
+    size: 50Gi
+    mountPath: /data/temp
+    existingClaim: ""
+
+config:
+  mountPath: /app/config
+  fileName: vshift.yaml
+
+logging:
+  level: INFO

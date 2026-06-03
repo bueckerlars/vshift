@@ -1,0 +1,15 @@
+vshift has been installed.
+
+Server API:
+  kubectl port-forward svc/{{ include "vshift.fullname" . }}-server 8000:{{ .Values.server.service.port }}
+  open http://localhost:8000/docs
+
+Worker mode: {{ .Values.worker.mode }}
+{{- if .Values.worker.dynamic.enabled }}
+Dynamic worker Jobs are created by the server when the queue has pending jobs.
+{{- end }}
+{{- if .Values.worker.static.enabled }}
+Static worker deployment replicas: {{ .Values.worker.static.replicas }}
+{{- end }}
+
+Redis must be reachable at {{ .Values.redis.host }}:{{ .Values.redis.port }}.
