@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from vshift.domain.transcoding_profile.enums import (
     AudioSelectionMode,
@@ -62,11 +62,13 @@ class HandBrakeImporter:
             framerate_mode = FramerateMode.VFR
 
         audio_list = hb.get("AudioList", [])
-        audio_tracks = [
-            self._parse_audio_track(track)
-            for track in audio_list
-            if isinstance(track, dict)
-        ]
+        audio_tracks: list[AudioTrack] = []
+        if isinstance(audio_list, list):
+            for track in cast(list[Any], audio_list):
+                if isinstance(track, dict):
+                    audio_tracks.append(
+                        self._parse_audio_track(cast(dict[str, Any], track))
+                    )
         audio_selection_mode = self._parse_audio_selection_mode(
             str(hb.get("AudioTrackSelectionBehavior", "auto"))
         )
@@ -145,11 +147,20 @@ class HandBrakeImporter:
 
     def _handbrake_root_nodes(self, parsed: Any) -> list[dict[str, Any]]:
         if isinstance(parsed, list):
-            return [node for node in parsed if isinstance(node, dict)]
-        if isinstance(parsed, dict) and "PresetList" in parsed:
-            preset_list = parsed["PresetList"]
+            return [
+                cast(dict[str, Any], node)
+                for node in cast(list[Any], parsed)
+                if isinstance(node, dict)
+            ]
+        if isinstance(parsed, dict):
+            parsed_dict = cast(dict[str, Any], parsed)
+            preset_list = parsed_dict.get("PresetList")
             if isinstance(preset_list, list):
-                return [node for node in preset_list if isinstance(node, dict)]
+                return [
+                    cast(dict[str, Any], node)
+                    for node in cast(list[Any], preset_list)
+                    if isinstance(node, dict)
+                ]
         msg = "Unrecognized HandBrake preset document structure"
         raise ValueError(msg)
 
@@ -161,7 +172,11 @@ class HandBrakeImporter:
             if node.get("Folder", False):
                 children = node.get("ChildrenArray", [])
                 if isinstance(children, list):
-                    child_dicts = [c for c in children if isinstance(c, dict)]
+                    child_dicts = [
+                        cast(dict[str, Any], child)
+                        for child in cast(list[Any], children)
+                        if isinstance(child, dict)
+                    ]
                     yield from self._iter_handbrake_leaf_presets(child_dicts)
             else:
                 yield node
@@ -254,7 +269,7 @@ class HandBrakeImporter:
     def _parse_language_list(self, value: Any) -> list[str]:
         if not isinstance(value, list):
             return []
-        return [str(item) for item in value]
+        return [str(item) for item in cast(list[Any], value)]
 
     def _parse_subtitle_tracks(self, hb: dict[str, Any]) -> list[SubtitleTrack]:
         language_list = self._parse_language_list(hb.get("SubtitleLanguageList", []))

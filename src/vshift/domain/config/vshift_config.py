@@ -51,7 +51,7 @@ class VshiftConfig(BaseModel):
     behavior: BehaviorSettings = Field(default_factory=BehaviorSettings)
     directories: ConfigDirectories
     profiles: dict[str, VshiftProfile]
-    rules: list[MatchRule] = Field(default_factory=list)
+    rules: list[MatchRule] = Field(default_factory=lambda: list[MatchRule]())
 
     @model_validator(mode="after")
     def validate_config(self) -> Self:

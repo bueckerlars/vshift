@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 import pytest
 import yaml
@@ -30,8 +31,8 @@ def _sample_profile(name: str = "Test Profile") -> VshiftProfile:
     )
 
 
-def _sample_config(**overrides: object) -> VshiftConfig:
-    data = {
+def _sample_config(**overrides: Any) -> VshiftConfig:
+    data: dict[str, Any] = {
         "directories": {
             "input": "/data/input",
             "output": "/data/output",

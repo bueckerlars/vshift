@@ -1,5 +1,5 @@
 import fnmatch
-from typing import Self
+from typing import Any, Self, cast
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -26,7 +26,8 @@ class MatchCriteria(BaseModel):
     def normalize_extensions(cls, value: object) -> list[str]:
         if not isinstance(value, list):
             return []
-        return [str(item).lower().removeprefix(".") for item in value]
+        items = cast(list[Any], value)
+        return [str(item).lower().removeprefix(".") for item in items]
 
     @model_validator(mode="after")
     def validate_bounds(self) -> Self:

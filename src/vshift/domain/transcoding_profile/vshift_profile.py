@@ -107,28 +107,30 @@ class VshiftProfile(BaseModel):
     format: str = Field(description="Output container format (e.g. mp4, mkv)")
     video: VideoProfile = Field(description="Video encoding settings")
     audio_tracks: list[AudioTrack] = Field(
-        default_factory=list, description="Audio track encoding settings"
+        default_factory=lambda: list[AudioTrack](),
+        description="Audio track encoding settings",
     )
     audio_selection_mode: AudioSelectionMode = Field(
         default=AudioSelectionMode.AUTO,
         description="Automatic audio track selection strategy",
     )
     audio_language_list: list[str] = Field(
-        default_factory=list,
+        default_factory=lambda: list[str](),
         description="Preferred audio languages for auto selection",
     )
     audio_passthrough: bool = Field(
         default=False, description="Allow passthrough/copy for audio tracks"
     )
     subtitle_tracks: list[SubtitleTrack] = Field(
-        default_factory=list, description="Subtitle track handling settings"
+        default_factory=lambda: list[SubtitleTrack](),
+        description="Subtitle track handling settings",
     )
     subtitle_selection_mode: SubtitleSelectionMode = Field(
         default=SubtitleSelectionMode.AUTO,
         description="Automatic subtitle track selection strategy",
     )
     subtitle_language_list: list[str] = Field(
-        default_factory=list,
+        default_factory=lambda: list[str](),
         description="Preferred subtitle languages for auto selection",
     )
     subtitle_passthrough: bool = Field(

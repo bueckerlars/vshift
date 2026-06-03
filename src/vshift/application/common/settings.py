@@ -55,7 +55,7 @@ class RedisConnectionSettings(BaseModel):
 
     @model_validator(mode="after")
     def validate_password(self) -> Self:
-        if self.password is None:
+        if not self.password.get_secret_value():
             raise VShiftException("Redis password is required")
         return self
 

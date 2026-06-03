@@ -6,7 +6,7 @@ def main() -> None:
     Main function for the application.
     """
     context = ServerApplicationContext()
-    context._log_settings()
+    context.log_settings()
 
 
 if __name__ == "__main__":

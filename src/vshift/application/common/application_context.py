@@ -26,7 +26,7 @@ class ApplicationContext:
     def settings(self) -> Settings:
         return Settings()
 
-    def _log_settings(self) -> None:
+    def log_settings(self) -> None:
         table = Table(show_header=True, header_style="bold")
         table.add_column("Setting", style="cyan", no_wrap=True)
         table.add_column("Value", style="green")
@@ -45,12 +45,14 @@ class ApplicationContext:
 
 def _settings_sections(model: BaseModel) -> list[tuple[str, list[tuple[str, str]]]]:
     sections: list[tuple[str, list[tuple[str, str]]]] = []
-    for name in model.model_fields:
+    model_type = type(model)
+    for name in model_type.model_fields:
         value = getattr(model, name)
         if isinstance(value, BaseModel):
+            value_type = type(value)
             rows = [
                 (field_name, str(getattr(value, field_name)))
-                for field_name in value.model_fields
+                for field_name in value_type.model_fields
             ]
             sections.append((name, rows))
     return sections
