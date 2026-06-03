@@ -7,9 +7,9 @@ behavior:
   max_retries: 3
 
 directories:
-  input: /data/input
-  output: /data/output
-  temp: /data/temp
+  input: data/input
+  output: data/output
+  temp: data/temp
 
 profiles:
   h264_1080p:
@@ -37,10 +37,6 @@ profiles:
       quality: 23.0
       width: 1280
       height: 720
-
-  # External profile file example:
-  # h264_ref:
-  #   $ref: profiles/h264_1080p.yaml
 
 rules:
   - id: movies_1080p

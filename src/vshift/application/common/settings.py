@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Literal, Self
 
 from pydantic import BaseModel, Field, PositiveInt, SecretStr, model_validator
@@ -60,6 +61,13 @@ class RedisConnectionSettings(BaseModel):
         return self
 
 
+class ConfigSettings(BaseModel):
+    file: Path = Field(
+        default=Path("config/vshift.yaml"),
+        description="Path to the vshift YAML configuration file",
+    )
+
+
 class QueueSettings(BaseModel):
     """
     Settings for the queue.
@@ -88,5 +96,6 @@ class Settings(BaseSettings):
     application: ApplicationSettings = Field(default_factory=ApplicationSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     directories: DirectorySettings = Field(default_factory=DirectorySettings)
+    config: ConfigSettings = Field(default_factory=ConfigSettings)
     redis: RedisConnectionSettings = Field(default_factory=RedisConnectionSettings)  # type: ignore
     queue: QueueSettings = Field(default_factory=QueueSettings)

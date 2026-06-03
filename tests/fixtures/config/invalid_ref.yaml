@@ -1,0 +1,10 @@
+version: "1"
+
+directories:
+  input: /tmp/input
+  output: /tmp/output
+  temp: /tmp/temp
+
+profiles:
+  broken_profile:
+    $ref: profiles/missing.yaml

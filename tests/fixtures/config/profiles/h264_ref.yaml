@@ -1,0 +1,9 @@
+name: "Referenced Profile"
+format: mp4
+video:
+  codec: h264
+  encoder: auto
+  quality_mode: constant
+  quality: 21.0
+  width: 1920
+  height: 1080

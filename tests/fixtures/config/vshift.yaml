@@ -1,0 +1,30 @@
+version: "1"
+
+behavior:
+  no_match: ignore
+  file_stability_seconds: 5
+  max_retries: 2
+
+directories:
+  input: /tmp/input
+  output: /tmp/output
+  temp: /tmp/temp
+
+profiles:
+  inline_profile:
+    name: "Inline"
+    format: mp4
+    video:
+      codec: h264
+      encoder: auto
+      quality_mode: constant
+      quality: 22.0
+
+  ref_profile:
+    $ref: profiles/h264_ref.yaml
+
+rules:
+  - id: default
+    match:
+      extensions: [mp4]
+    profile: inline_profile

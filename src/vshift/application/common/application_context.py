@@ -8,6 +8,7 @@ from rich.table import Table
 
 from vshift import __app_name__, __version__
 from vshift.application.common.settings import Settings
+from vshift.infrastructure.filesystem.yaml_config_repository import YamlConfigRepository
 
 
 class ApplicationContext:
@@ -25,6 +26,10 @@ class ApplicationContext:
     @cached_property
     def settings(self) -> Settings:
         return Settings()
+
+    @cached_property
+    def config_repository(self) -> YamlConfigRepository:
+        return YamlConfigRepository(self.settings.config.file)
 
     def log_settings(self) -> None:
         table = Table(show_header=True, header_style="bold")
