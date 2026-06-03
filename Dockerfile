@@ -1,5 +1,7 @@
 FROM python:3.13-slim-bookworm
 
+LABEL org.opencontainers.image.source=https://github.com/bueckerlars/vshift
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ffmpeg \
     && rm -rf /var/lib/apt/lists/*

@@ -1,5 +1,5 @@
 image:
-  repository: vshift
+  repository: ghcr.io/bueckerlars/vshift
   tag: latest
   pullPolicy: IfNotPresent
 

@@ -185,8 +185,10 @@ Scale workers by launching additional `vshift-worker` processes.
 Build the image:
 
 ```bash
-docker build -t vshift:latest .
+docker build -t ghcr.io/bueckerlars/vshift:latest .
 ```
+
+Release images are published to `ghcr.io/bueckerlars/vshift` when a Git tag is pushed.
 
 The image includes FFmpeg and exposes port `8000`. Entry points:
 

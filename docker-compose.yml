@@ -11,6 +11,7 @@ services:
       retries: 5
 
   server:
+    image: ghcr.io/bueckerlars/vshift:latest
     build: .
     command: vshift-server
     ports:
@@ -27,6 +28,7 @@ services:
         condition: service_healthy
 
   worker:
+    image: ghcr.io/bueckerlars/vshift:latest
     build: .
     command: vshift-worker
     volumes:

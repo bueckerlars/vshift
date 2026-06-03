@@ -682,14 +682,14 @@ services:
     # Or use external managed Redis — set REDIS_HOST accordingly
 
   server:
-    image: vshift:latest
+    image: ghcr.io/bueckerlars/vshift:latest
     command: vshift-server
     volumes: [./data:/data, ./config:/config]
     environment:
       VSHIFT__REDIS__HOST: redis
 
   worker:
-    image: vshift:latest
+    image: ghcr.io/bueckerlars/vshift:latest
     command: vshift-worker
     deploy:
       replicas: 3

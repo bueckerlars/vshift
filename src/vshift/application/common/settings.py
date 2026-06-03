@@ -113,7 +113,7 @@ class KubernetesSettings(BaseModel):
     enabled: bool = Field(default=False)
     namespace: str = Field(default="default", min_length=1)
     in_cluster: bool = Field(default=True)
-    worker_image: str = Field(default="vshift:latest", min_length=1)
+    worker_image: str = Field(default="ghcr.io/bueckerlars/vshift:latest", min_length=1)
     worker_image_pull_policy: str = Field(default="IfNotPresent")
     max_concurrent_pods: PositiveInt = Field(default=5)
     worker_service_account: str = Field(default="vshift-worker", min_length=1)
