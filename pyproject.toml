@@ -4,11 +4,18 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "loguru>=0.7.3",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.1",
+    "redis>=8.0.0",
+    "rich>=15.0.0",
+]
 
 [dependency-groups]
 dev = [
     "prek>=0.4",
+    "pytest>=8.4.0",
     "ruff>=0.15.15",
 ]
 

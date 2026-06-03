@@ -20,12 +20,10 @@ repos:
         args: [--fix]
       - id: ruff-format
 
-  # Optional: enable when you want type checking on every commit.
-  # Requires [tool.pyright] venvPath/venv in pyproject.toml (see pyright docs).
-  # - repo: https://github.com/RobertCraigie/pyright-python
-  #   rev: v1.1.409
-  #   hooks:
-  #     - id: pyright
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.410
+    hooks:
+      - id: pyright
 
   # Optional: keep uv.lock in sync when pyproject.toml changes.
   # - repo: https://github.com/astral-sh/uv-pre-commit
