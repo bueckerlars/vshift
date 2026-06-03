@@ -193,14 +193,14 @@ Release images are published to `ghcr.io/bueckerlars/vshift` when a Git tag is p
 Pull a release image:
 
 ```bash
-docker pull ghcr.io/bueckerlars/vshift:v0.1.1
+docker pull ghcr.io/bueckerlars/vshift:latest
 ```
 
-If you see an `unauthorized` error, the GHCR package is still private. Either make it public once under [Package settings](https://github.com/users/bueckerlars/packages/container/vshift/settings), or authenticate before pulling:
+GHCR packages are **private by default** (same as findus). After the first release, set the package to **Public** once under [Package settings](https://github.com/users/bueckerlars/packages/container/vshift/settings) → Danger Zone → Change visibility. Until then, authenticate before pulling:
 
 ```bash
 echo "$GITHUB_TOKEN" | docker login ghcr.io -u bueckerlars --password-stdin
-docker pull ghcr.io/bueckerlars/vshift:v0.1.1
+docker pull ghcr.io/bueckerlars/vshift:latest
 ```
 
 The image includes FFmpeg and exposes port `8000`. Entry points:
