@@ -34,6 +34,15 @@ wheels = [
 ]
 
 [[package]]
+name = "ffmpeg-core"
+version = "4.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3b/18/7a9c86748be940a31fbfabb9abfafba2fa646d30251599f09829a295de92/ffmpeg_core-4.1.tar.gz", hash = "sha256:732c36a900dc9d025ee756adee6bddbd350336456d9fde60fce75a90b7bcc7fc", size = 43532, upload-time = "2026-04-18T11:11:38.055Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a8/c3/127d79ddeb402fe17216555f04125132781d19949c97e455676665dabe8e/ffmpeg_core-4.1-py3-none-any.whl", hash = "sha256:68f59c1a81268b8af14c62e9dfbc69cc021792d3a8b9ebf83609715b06f83766", size = 53035, upload-time = "2026-04-18T11:11:36.817Z" },
+]
+
+[[package]]
 name = "iniconfig"
 version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -352,6 +361,30 @@ wheels = [
 ]
 
 [[package]]
+name = "typed-ffmpeg"
+version = "4.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typed-ffmpeg-v8" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4f/a7/4171baf4cfcb3f259d8f6c43a3fd9e1bfd17e8f09339b3c972f74320c815/typed_ffmpeg-4.1.tar.gz", hash = "sha256:680b388b00a7f8aaa0731e6d284cdd8bedba19c17fc50f23b573fb1f037d990e", size = 2057, upload-time = "2026-04-18T11:13:31.934Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9b/c4/feea760dde1855b008b2f8a8c2052cd10431d6310f4ec9a351d02c43a55b/typed_ffmpeg-4.1-py3-none-any.whl", hash = "sha256:1e066efa262f19b9254d315149d2e03511ffc96689d7b24788ede97db7dd7e2b", size = 1833, upload-time = "2026-04-18T11:13:31.122Z" },
+]
+
+[[package]]
+name = "typed-ffmpeg-v8"
+version = "4.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "ffmpeg-core" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f7/3a/3a41768c9e4d5871d10975b54cf0e2b30a3011e55d046b39a210c1591653/typed_ffmpeg_v8-4.1.tar.gz", hash = "sha256:c006248ec7b2a352669c9d17a2375ea6b3e92256dc15c0fc2e8dba2e3733e8b5", size = 345975, upload-time = "2026-04-18T11:13:19.59Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ec/fa/1ef8a3a50a3962495a190ccb3bb56771af21150471be7f50fe8099d0e0f6/typed_ffmpeg_v8-4.1-py3-none-any.whl", hash = "sha256:cf07c92137ce30710783aca9d2834d2446371320c05f6ee6c04548c3a8bddb59", size = 366919, upload-time = "2026-04-18T11:13:18.344Z" },
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.15.0"
 source = { registry = "https://pypi.org/simple" }
@@ -383,6 +416,7 @@ dependencies = [
     { name = "pyyaml" },
     { name = "redis" },
     { name = "rich" },
+    { name = "typed-ffmpeg" },
 ]
 
 [package.dev-dependencies]
@@ -403,6 +437,7 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "redis", specifier = ">=8.0.0" },
     { name = "rich", specifier = ">=15.0.0" },
+    { name = "typed-ffmpeg", specifier = ">=4.1" },
 ]
 
 [package.metadata.requires-dev]

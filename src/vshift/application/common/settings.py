@@ -61,6 +61,11 @@ class RedisConnectionSettings(BaseModel):
         return self
 
 
+class FfmpegSettings(BaseModel):
+    ffmpeg_path: str = Field(default="ffmpeg", description="Path to ffmpeg binary")
+    ffprobe_path: str = Field(default="ffprobe", description="Path to ffprobe binary")
+
+
 class ConfigSettings(BaseModel):
     file: Path = Field(
         default=Path("config/vshift.yaml"),
@@ -98,5 +103,6 @@ class Settings(BaseSettings):
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     directories: DirectorySettings = Field(default_factory=DirectorySettings)
     config: ConfigSettings = Field(default_factory=ConfigSettings)
+    ffmpeg: FfmpegSettings = Field(default_factory=FfmpegSettings)
     redis: RedisConnectionSettings = Field(default_factory=RedisConnectionSettings)  # type: ignore
     queue: QueueSettings = Field(default_factory=QueueSettings)
