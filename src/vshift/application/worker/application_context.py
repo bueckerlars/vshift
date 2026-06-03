@@ -60,6 +60,7 @@ class WorkerApplicationContext(ApplicationContext):
             stores.task_queue,
             stores.worker_registry,
             worker_id=self.worker_id,
+            dequeue_timeout_seconds=self.settings.worker.claim_dequeue_timeout_seconds,
         )
 
     @cached_property

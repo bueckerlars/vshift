@@ -1,0 +1,43 @@
+services:
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass vshift
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "vshift", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  server:
+    build: .
+    command: vshift-server
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    environment:
+      VSHIFT__REDIS__HOST: redis
+      VSHIFT__REDIS__PASSWORD: vshift
+      VSHIFT__CONFIG__FILE: /app/config/vshift.yaml
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: .
+    command: vshift-worker
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    environment:
+      VSHIFT__REDIS__HOST: redis
+      VSHIFT__REDIS__PASSWORD: vshift
+      VSHIFT__CONFIG__FILE: /app/config/vshift.yaml
+    depends_on:
+      redis:
+        condition: service_healthy
+    deploy:
+      replicas: 2

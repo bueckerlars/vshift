@@ -9,11 +9,19 @@ from vshift.application.server.use_cases.scan_input import ScanInputFolder
 from vshift.infrastructure.ffmpeg.media_prober import FfmpegMediaProber
 from vshift.infrastructure.ffmpeg.models import FfmpegPaths
 from vshift.infrastructure.filesystem.poll_file_scanner import PollFileScanner
+from vshift.infrastructure.redis.factory import RedisStores, create_redis_stores
 
 
 class ServerApplicationContext(ApplicationContext):
-    def __init__(self) -> None:
+    def __init__(self, *, redis_stores: RedisStores | None = None) -> None:
+        self._injected_redis_stores = redis_stores
         super().__init__()
+
+    @cached_property
+    def redis_stores(self) -> RedisStores:
+        if self._injected_redis_stores is not None:
+            return self._injected_redis_stores
+        return create_redis_stores(self.settings.redis, self.settings.queue)
 
     @cached_property
     def media_prober(self) -> FfmpegMediaProber:

@@ -85,6 +85,34 @@ class QueueSettings(BaseModel):
     worker_ttl_seconds: PositiveInt = Field(default=30)
 
 
+class ApiSettings(BaseModel):
+    """Settings for the REST API server."""
+
+    host: str = Field(default="0.0.0.0")
+    port: PositiveInt = Field(default=8000)
+    docs_enabled: bool = Field(
+        default=True,
+        description="Expose Swagger UI, ReDoc, and the OpenAPI schema",
+    )
+    docs_url: str = Field(default="/docs", description="Swagger UI path")
+    redoc_url: str = Field(default="/redoc", description="ReDoc UI path")
+    openapi_url: str = Field(default="/openapi.json", description="OpenAPI schema path")
+
+
+class ServerRuntimeSettings(BaseModel):
+    """Background task intervals for the server process."""
+
+    scan_interval_seconds: PositiveInt = Field(default=30)
+    recovery_interval_seconds: PositiveInt = Field(default=60)
+
+
+class WorkerRuntimeSettings(BaseModel):
+    """Runtime settings for the worker process."""
+
+    idle_sleep_seconds: PositiveInt = Field(default=1)
+    claim_dequeue_timeout_seconds: PositiveInt = Field(default=5)
+
+
 class Settings(BaseSettings):
     """
     Application settings.
@@ -106,3 +134,6 @@ class Settings(BaseSettings):
     ffmpeg: FfmpegSettings = Field(default_factory=FfmpegSettings)
     redis: RedisConnectionSettings = Field(default_factory=RedisConnectionSettings)  # type: ignore
     queue: QueueSettings = Field(default_factory=QueueSettings)
+    api: ApiSettings = Field(default_factory=ApiSettings)
+    server: ServerRuntimeSettings = Field(default_factory=ServerRuntimeSettings)
+    worker: WorkerRuntimeSettings = Field(default_factory=WorkerRuntimeSettings)
