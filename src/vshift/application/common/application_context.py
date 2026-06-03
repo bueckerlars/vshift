@@ -9,6 +9,7 @@ from rich.table import Table
 from vshift import __app_name__, __version__
 from vshift.application.common.settings import Settings
 from vshift.infrastructure.filesystem.yaml_config_repository import YamlConfigRepository
+from vshift.infrastructure.redis.factory import RedisStores, create_redis_stores
 
 
 class ApplicationContext:
@@ -30,6 +31,10 @@ class ApplicationContext:
     @cached_property
     def config_repository(self) -> YamlConfigRepository:
         return YamlConfigRepository(self.settings.config.file)
+
+    @cached_property
+    def redis_stores(self) -> RedisStores:
+        return create_redis_stores(self.settings.redis, self.settings.queue)
 
     def log_settings(self) -> None:
         table = Table(show_header=True, header_style="bold")

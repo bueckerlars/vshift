@@ -69,14 +69,15 @@ class ConfigSettings(BaseModel):
 
 
 class QueueSettings(BaseModel):
-    """
-    Settings for the queue.
-    """
+    """Settings for Redis-backed queues and job storage."""
 
+    key_prefix: str = Field(default="vshift", min_length=1)
     ttl: PositiveInt = Field(
-        default=60 * 60 * 24,  # 24 hours
-        description="Time to live for the queues",
+        default=60 * 60 * 24,
+        description="Time to live for persisted jobs and summaries in seconds",
     )
+    job_heartbeat_ttl_seconds: PositiveInt = Field(default=60)
+    worker_ttl_seconds: PositiveInt = Field(default=30)
 
 
 class Settings(BaseSettings):
