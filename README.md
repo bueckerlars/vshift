@@ -190,6 +190,19 @@ docker build -t ghcr.io/bueckerlars/vshift:latest .
 
 Release images are published to `ghcr.io/bueckerlars/vshift` when a Git tag is pushed.
 
+Pull a release image:
+
+```bash
+docker pull ghcr.io/bueckerlars/vshift:v0.1.1
+```
+
+If you see an `unauthorized` error, the GHCR package is still private. Either make it public once under [Package settings](https://github.com/users/bueckerlars/packages/container/vshift/settings), or authenticate before pulling:
+
+```bash
+echo "$GITHUB_TOKEN" | docker login ghcr.io -u bueckerlars --password-stdin
+docker pull ghcr.io/bueckerlars/vshift:v0.1.1
+```
+
 The image includes FFmpeg and exposes port `8000`. Entry points:
 
 - `vshift-server` — default `CMD`
