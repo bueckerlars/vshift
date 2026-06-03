@@ -1,0 +1,14 @@
+from typing import Protocol
+from uuid import UUID
+
+
+class TaskQueue(Protocol):
+    """FIFO queue of pending job IDs backed by Redis."""
+
+    def enqueue(self, job_id: UUID) -> None: ...
+
+    def dequeue(self, *, timeout_seconds: int = 0) -> UUID | None: ...
+
+    def requeue(self, job_id: UUID) -> None: ...
+
+    def depth(self) -> int: ...
