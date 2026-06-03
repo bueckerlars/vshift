@@ -30,3 +30,24 @@ class SubtitleSelectionMode(StrEnum):
     ALL = "all"
     NONE = "none"
     FOREIGN = "foreign"
+
+
+class VideoEncoder(StrEnum):
+    AUTO = "auto"
+    # Software
+    LIBX264 = "libx264"
+    LIBX265 = "libx265"
+    LIBSVTAV1 = "libsvtav1"
+    # NVIDIA
+    H264_NVENC = "h264_nvenc"
+    HEVC_NVENC = "hevc_nvenc"
+    AV1_NVENC = "av1_nvenc"
+    # Intel QSV
+    H264_QSV = "h264_qsv"
+    HEVC_QSV = "hevc_qsv"
+    # VAAPI (Linux)
+    H264_VAAPI = "h264_vaapi"
+    HEVC_VAAPI = "hevc_vaapi"
+    # Apple
+    H264_VIDEOTOOLBOX = "h264_videotoolbox"
+    HEVC_VIDEOTOOLBOX = "hevc_videotoolbox"

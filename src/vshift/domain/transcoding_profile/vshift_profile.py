@@ -8,12 +8,17 @@ from vshift.domain.transcoding_profile.enums import (
     FrameRateType,
     QualityMode,
     SubtitleSelectionMode,
+    VideoEncoder,
 )
 from vshift.exception import VShiftException
 
 
 class VideoProfile(BaseModel):
     codec: str = Field(description="Video codec (e.g. h264, h265, av1)")
+    encoder: VideoEncoder = Field(
+        default=VideoEncoder.AUTO,
+        description="FFmpeg encoder; auto selects hardware when available",
+    )
     color_space: str = Field(
         default="yuv420p", description="Pixel format / color space"
     )

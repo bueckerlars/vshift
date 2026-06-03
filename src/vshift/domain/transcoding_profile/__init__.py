@@ -4,6 +4,7 @@ from vshift.domain.transcoding_profile.enums import (
     FrameRateType,
     QualityMode,
     SubtitleSelectionMode,
+    VideoEncoder,
 )
 from vshift.domain.transcoding_profile.vshift_profile import (
     AudioTrack,
@@ -20,6 +21,7 @@ __all__ = [
     "QualityMode",
     "SubtitleSelectionMode",
     "SubtitleTrack",
+    "VideoEncoder",
     "VideoProfile",
     "VshiftProfile",
 ]

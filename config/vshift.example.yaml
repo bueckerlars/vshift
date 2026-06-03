@@ -1,0 +1,57 @@
+version: "1"
+
+behavior:
+  no_match: ignore
+  input_after_success: keep
+  file_stability_seconds: 10
+  max_retries: 3
+
+directories:
+  input: /data/input
+  output: /data/output
+  temp: /data/temp
+
+profiles:
+  h264_1080p:
+    name: "H.264 1080p"
+    format: mp4
+    video:
+      codec: h264
+      encoder: auto
+      quality_mode: constant
+      quality: 22.0
+      width: 1920
+      height: 1080
+    audio_tracks:
+      - codec: aac
+        bit_rate: 160
+        mixdown: stereo
+
+  h264_720p:
+    name: "H.264 720p"
+    format: mp4
+    video:
+      codec: h264
+      encoder: auto
+      quality_mode: constant
+      quality: 23.0
+      width: 1280
+      height: 720
+
+rules:
+  - id: movies_1080p
+    priority: 10
+    match:
+      extensions: [mkv, mp4]
+      min_width: 1280
+      max_width: 1920
+      filename_glob: "*.mkv"
+    profile: h264_1080p
+
+  - id: small_files
+    priority: 20
+    match:
+      extensions: [mp4]
+      max_width: 1280
+      filename_glob: "*"
+    profile: h264_720p
