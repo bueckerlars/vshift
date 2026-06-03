@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 import subprocess
 import time
 from datetime import UTC, datetime, timedelta
@@ -13,6 +12,7 @@ from vshift.exception import VShiftException
 from vshift.infrastructure.ffmpeg.command_builder import FfmpegCommandBuilder
 from vshift.infrastructure.ffmpeg.models import FfmpegPaths
 from vshift.infrastructure.ffmpeg.probe import FfmpegProbe
+from vshift.infrastructure.ffmpeg.version import ffmpeg_version
 
 
 class FfmpegTranscoder:
@@ -70,7 +70,7 @@ class FfmpegTranscoder:
         return TranscodeResult(
             output_path=output_path,
             wall_clock_seconds=wall_clock_seconds,
-            ffmpeg_version=_ffmpeg_version(self._paths.ffmpeg),
+            ffmpeg_version=ffmpeg_version(self._paths.ffmpeg),
             video_codec_out=video_codec_out,
             resolution_out=resolution_out,
         )
@@ -119,23 +119,3 @@ def _format_resolution(width: int | None, height: int | None) -> str | None:
     if width is None or height is None:
         return None
     return f"{width}x{height}"
-
-
-def _ffmpeg_version(ffmpeg_path: str) -> str:
-    completed = subprocess.run(
-        [ffmpeg_path, "-version"],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    if completed.returncode != 0:
-        return "unknown"
-
-    first_line = completed.stdout.splitlines()
-    if not first_line:
-        return "unknown"
-
-    match = re.search(r"ffmpeg version (\S+)", first_line[0])
-    if match is None:
-        return "unknown"
-    return match.group(1)
