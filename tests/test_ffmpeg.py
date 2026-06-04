@@ -224,6 +224,31 @@ def test_profile_mapper_applies_libx265_preset() -> None:
     assert "yuv420p10le" in mapped.video_args
 
 
+def test_command_builder_maps_mkv_to_matroska_muxer() -> None:
+    profile = VshiftProfile.model_validate(
+        {
+            "name": "HEVC MKV",
+            "format": "mkv",
+            "video": {
+                "codec": "h265",
+                "encoder": "libx265",
+                "quality_mode": "constant",
+                "quality": 22.0,
+            },
+        }
+    )
+    builder = FfmpegCommandBuilder(
+        encoder_resolver=EncoderResolver(available_encoders={"libx265"}),
+    )
+    command = builder.build(
+        _sample_job(profile),
+        output_path=Path("/data/temp/job.partial.mkv"),
+    )
+
+    format_index = command.index("-f")
+    assert command[format_index + 1] == "matroska"
+
+
 def test_command_builder_assembles_ffmpeg_argv() -> None:
     builder = FfmpegCommandBuilder(
         encoder_resolver=EncoderResolver(available_encoders={"libx264"}),

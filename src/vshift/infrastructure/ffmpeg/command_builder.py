@@ -2,6 +2,7 @@ from pathlib import Path
 
 from vshift.domain.job.transcode_job import TranscodeJob
 from vshift.domain.transcoding_profile.enums import VideoEncoder
+from vshift.infrastructure.ffmpeg.container_format import ffmpeg_muxer_format
 from vshift.infrastructure.ffmpeg.encoder_resolver import EncoderResolver
 from vshift.infrastructure.ffmpeg.models import FfmpegPaths
 from vshift.infrastructure.ffmpeg.profile_mapper import ProfileMapper
@@ -54,5 +55,5 @@ class FfmpegCommandBuilder:
             command.extend(["-vf", mapped.video_filter])
         command.extend(mapped.audio_args)
         command.extend(mapped.output_args)
-        command.extend(["-f", profile.format, str(output_path)])
+        command.extend(["-f", ffmpeg_muxer_format(profile.format), str(output_path)])
         return command

@@ -3,10 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Protocol, cast
 
-import ffmpeg
-from ffmpeg.exceptions import FFMpegExecuteError
-
 from vshift.exception import VShiftException
+from vshift.infrastructure.ffmpeg._python_ffmpeg import FFMpegExecuteError, ffmpeg
 from vshift.infrastructure.ffmpeg.models import FfmpegPaths, MediaProbe
 from vshift.infrastructure.ffmpeg.video_stream_info import parse_video_stream
 
