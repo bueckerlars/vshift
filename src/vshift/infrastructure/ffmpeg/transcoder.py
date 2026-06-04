@@ -8,11 +8,22 @@ from pathlib import Path
 from vshift.domain.job.job_summary import JobSummary
 from vshift.domain.job.transcode_job import TranscodeJob
 from vshift.domain.transcoding.transcode_result import TranscodeResult
+from vshift.domain.transcoding_profile.enums import VideoEncoder
 from vshift.exception import VShiftException
 from vshift.infrastructure.ffmpeg.command_builder import FfmpegCommandBuilder
+from vshift.infrastructure.ffmpeg.encoder_resolver import EncoderResolver
 from vshift.infrastructure.ffmpeg.models import FfmpegPaths
 from vshift.infrastructure.ffmpeg.probe import FfmpegProbe
 from vshift.infrastructure.ffmpeg.version import ffmpeg_version
+
+_HARDWARE_ENCODER_FAILURE_MARKERS = (
+    "Error creating a MFX session",
+    "Cannot load libcuda",
+    "Cannot load nvcuda",
+    "Failed to initialise VAAPI",
+    "No VA display",
+    "Error while opening encoder",
+)
 
 
 class FfmpegTranscoder:
@@ -45,7 +56,13 @@ class FfmpegTranscoder:
         if temp_output.exists():
             temp_output.unlink()
 
-        command = self._command_builder.build(job, output_path=temp_output)
+        profile = job.profile_snapshot
+        video_encoder = self._command_builder.resolve_encoder(job)
+        command = self._command_builder.build(
+            job,
+            output_path=temp_output,
+            video_encoder=video_encoder,
+        )
         started = time.perf_counter()
         completed = subprocess.run(
             command,
@@ -53,6 +70,27 @@ class FfmpegTranscoder:
             capture_output=True,
             text=True,
         )
+        if completed.returncode != 0 and self._should_retry_with_software(
+            completed.stderr,
+            video_encoder=video_encoder,
+            profile_encoder=profile.video.encoder,
+        ):
+            fallback = self._command_builder.software_fallback(profile.video.codec)
+            if temp_output.exists():
+                temp_output.unlink()
+            command = self._command_builder.build(
+                job,
+                output_path=temp_output,
+                video_encoder=fallback,
+            )
+            completed = subprocess.run(
+                command,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            video_encoder = fallback
+
         wall_clock_seconds = time.perf_counter() - started
 
         if completed.returncode != 0:
@@ -113,6 +151,19 @@ class FfmpegTranscoder:
         temp_dir.mkdir(parents=True, exist_ok=True)
         suffix = job.output_path.suffix or f".{job.profile_snapshot.format}"
         return temp_dir / f"{job.id}{suffix}.partial"
+
+    @staticmethod
+    def _should_retry_with_software(
+        stderr: str,
+        *,
+        video_encoder: VideoEncoder,
+        profile_encoder: VideoEncoder,
+    ) -> bool:
+        if profile_encoder != VideoEncoder.AUTO:
+            return False
+        if not EncoderResolver.is_hardware_encoder(video_encoder):
+            return False
+        return any(marker in stderr for marker in _HARDWARE_ENCODER_FAILURE_MARKERS)
 
 
 def _format_resolution(width: int | None, height: int | None) -> str | None:

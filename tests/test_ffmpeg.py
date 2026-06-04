@@ -55,13 +55,49 @@ def _sample_job(profile: VshiftProfile) -> TranscodeJob:
     )
 
 
-def test_encoder_resolver_prefers_hardware_for_auto() -> None:
+def test_encoder_resolver_prefers_hardware_for_auto(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "vshift.infrastructure.ffmpeg.encoder_resolver.EncoderResolver._nvidia_gpu_available",
+        lambda: True,
+    )
     resolver = EncoderResolver(
         available_encoders={"h264_nvenc", "libx264"},
     )
     profile = _sample_profile()
 
     assert resolver.resolve(profile.video) == VideoEncoder.H264_NVENC
+
+
+def test_encoder_resolver_skips_qsv_without_gpu_device(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "vshift.infrastructure.ffmpeg.encoder_resolver.EncoderResolver._intel_gpu_available",
+        lambda: False,
+    )
+    resolver = EncoderResolver(
+        available_encoders={"h264_qsv", "libx264"},
+    )
+    profile = _sample_profile()
+
+    assert resolver.resolve(profile.video) == VideoEncoder.LIBX264
+
+
+def test_encoder_resolver_prefers_qsv_when_gpu_device_present(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "vshift.infrastructure.ffmpeg.encoder_resolver.EncoderResolver._intel_gpu_available",
+        lambda: True,
+    )
+    resolver = EncoderResolver(
+        available_encoders={"h264_qsv", "libx264"},
+    )
+    profile = _sample_profile()
+
+    assert resolver.resolve(profile.video) == VideoEncoder.H264_QSV
 
 
 def test_encoder_resolver_uses_explicit_encoder() -> None:

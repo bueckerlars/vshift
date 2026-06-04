@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from vshift.domain.job.transcode_job import TranscodeJob
+from vshift.domain.transcoding_profile.enums import VideoEncoder
 from vshift.infrastructure.ffmpeg.encoder_resolver import EncoderResolver
 from vshift.infrastructure.ffmpeg.models import FfmpegPaths
 from vshift.infrastructure.ffmpeg.profile_mapper import ProfileMapper
@@ -19,12 +20,24 @@ class FfmpegCommandBuilder:
         self._encoder_resolver = encoder_resolver or EncoderResolver(self._paths)
         self._profile_mapper = profile_mapper or ProfileMapper()
 
-    def build(self, job: TranscodeJob, *, output_path: Path) -> list[str]:
+    def resolve_encoder(self, job: TranscodeJob) -> VideoEncoder:
+        return self._encoder_resolver.resolve(job.profile_snapshot.video)
+
+    def software_fallback(self, codec: str) -> VideoEncoder:
+        return self._encoder_resolver.software_fallback(codec)
+
+    def build(
+        self,
+        job: TranscodeJob,
+        *,
+        output_path: Path,
+        video_encoder: VideoEncoder | None = None,
+    ) -> list[str]:
         profile = job.profile_snapshot
-        video_encoder = self._encoder_resolver.resolve(profile.video)
+        resolved_encoder = video_encoder or self.resolve_encoder(job)
         mapped = self._profile_mapper.map_profile(
             profile,
-            video_encoder=video_encoder,
+            video_encoder=resolved_encoder,
         )
 
         command: list[str] = [

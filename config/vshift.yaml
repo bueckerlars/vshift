@@ -26,7 +26,7 @@ rules:
     priority: 10
     match:
       extensions: [mkv, mp4, m4v, ts]
-      min_height: 2160
+      min_width: 3840
       min_bit_depth: 10
       hdr: true
     profile: 4k-10Bit-H265
@@ -35,7 +35,7 @@ rules:
     priority: 20
     match:
       extensions: [mkv, mp4, m4v, ts]
-      min_height: 2160
+      min_width: 3840
       max_bit_depth: 8
     profile: 4k-8Bit-SDR-H265
 
@@ -43,7 +43,7 @@ rules:
     priority: 25
     match:
       extensions: [mkv, mp4, m4v, ts]
-      min_height: 2160
+      min_width: 3840
       min_bit_depth: 10
       hdr: false
     profile: 4k-10Bit-H265
@@ -67,5 +67,5 @@ rules:
     priority: 50
     match:
       extensions: [mkv, mp4, m4v, ts]
-      min_height: 2160
+      min_width: 3840
     profile: 4k-8Bit-SDR-H265

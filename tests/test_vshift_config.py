@@ -219,7 +219,7 @@ def test_match_rule_bit_depth_and_hdr() -> None:
         {
             "id": "4k_hdr",
             "match": {
-                "min_height": 2160,
+                "min_width": 3840,
                 "min_bit_depth": 10,
                 "hdr": True,
             },
@@ -232,6 +232,16 @@ def test_match_rule_bit_depth_and_hdr() -> None:
             extension="mkv",
             width=3840,
             height=2160,
+            bit_depth=10,
+            hdr=True,
+        )
+    )
+    assert rule.matches(
+        ProbedInput(
+            path=Path("/data/input/spider.mkv"),
+            extension="mkv",
+            width=3840,
+            height=2080,
             bit_depth=10,
             hdr=True,
         )

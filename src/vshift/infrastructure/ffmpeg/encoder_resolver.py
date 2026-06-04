@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import subprocess
+import sys
+from pathlib import Path
 
 from ffmpeg_core.info import get_coders  # pyright: ignore[reportMissingTypeStubs]
 
@@ -8,6 +10,14 @@ from vshift.domain.transcoding_profile.enums import VideoEncoder
 from vshift.domain.transcoding_profile.vshift_profile import VideoProfile
 from vshift.exception import VShiftException
 from vshift.infrastructure.ffmpeg.models import FfmpegPaths
+
+_SOFTWARE_ENCODERS = frozenset(
+    {
+        VideoEncoder.LIBX264,
+        VideoEncoder.LIBX265,
+        VideoEncoder.LIBSVTAV1,
+    }
+)
 
 
 class EncoderResolver:
@@ -65,11 +75,19 @@ class EncoderResolver:
             if video.encoder.value not in self._available_encoders:
                 msg = f"encoder '{video.encoder.value}' is not available in ffmpeg"
                 raise VShiftException(msg)
+            if not self._encoder_usable(video.encoder):
+                msg = (
+                    f"encoder '{video.encoder.value}' is not usable on this host "
+                    "(missing GPU device)"
+                )
+                raise VShiftException(msg)
             return video.encoder
 
         codec = video.codec.lower()
         for encoder in self._CODEC_ENCODER_PRIORITY.get(codec, []):
-            if encoder.value in self._available_encoders:
+            if encoder.value in self._available_encoders and self._encoder_usable(
+                encoder
+            ):
                 return encoder
 
         fallback = self._SOFTWARE_FALLBACK.get(codec)
@@ -78,6 +96,20 @@ class EncoderResolver:
 
         msg = f"no available ffmpeg encoder found for codec '{video.codec}'"
         raise VShiftException(msg)
+
+    def software_fallback(self, codec: str) -> VideoEncoder:
+        fallback = self._SOFTWARE_FALLBACK.get(codec.lower())
+        if fallback is None:
+            msg = f"no software fallback encoder for codec '{codec}'"
+            raise VShiftException(msg)
+        if fallback.value not in self._available_encoders:
+            msg = f"software encoder '{fallback.value}' is not available in ffmpeg"
+            raise VShiftException(msg)
+        return fallback
+
+    @staticmethod
+    def is_hardware_encoder(encoder: VideoEncoder) -> bool:
+        return encoder not in _SOFTWARE_ENCODERS
 
     def list_available_encoders(self) -> set[str]:
         return set(self._available_encoders)
@@ -100,3 +132,38 @@ class EncoderResolver:
 
         coders = get_coders(completed.stdout.decode(errors="replace"))
         return {coder.name for coder in coders if coder.flags.video}
+
+    @staticmethod
+    def _encoder_usable(encoder: VideoEncoder) -> bool:
+        if encoder in _SOFTWARE_ENCODERS:
+            return True
+        if encoder in {
+            VideoEncoder.H264_VIDEOTOOLBOX,
+            VideoEncoder.HEVC_VIDEOTOOLBOX,
+        }:
+            return sys.platform == "darwin"
+        if encoder in {
+            VideoEncoder.H264_QSV,
+            VideoEncoder.HEVC_QSV,
+            VideoEncoder.H264_VAAPI,
+            VideoEncoder.HEVC_VAAPI,
+        }:
+            return EncoderResolver._intel_gpu_available()
+        if encoder in {
+            VideoEncoder.H264_NVENC,
+            VideoEncoder.HEVC_NVENC,
+            VideoEncoder.AV1_NVENC,
+        }:
+            return EncoderResolver._nvidia_gpu_available()
+        return False
+
+    @staticmethod
+    def _nvidia_gpu_available() -> bool:
+        return Path("/dev/nvidia0").exists()
+
+    @staticmethod
+    def _intel_gpu_available() -> bool:
+        dri = Path("/dev/dri")
+        if not dri.is_dir():
+            return False
+        return any(dri.glob("renderD*"))
