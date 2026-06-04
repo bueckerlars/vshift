@@ -222,6 +222,8 @@ helm install vshift ./helm/vshift \
 
 **Default worker mode: dynamic.** When `worker.dynamic.enabled` is true, the server creates Kubernetes Job pods (`vshift-worker` with `one_shot=true`) based on queue depth, up to `maxConcurrentPods`. Static worker Deployments are optional via `worker.static.enabled`.
 
+**Resource limits (required for stable clusters):** Defaults target **8 GiB RAM / 4 CPU per node**: server `250m`/`384Mi`, worker `1500m`–`3` CPU and `3Gi`–`5Gi` memory, `maxConcurrentPods: 1`, `ffmpeg.threads: 2`. Raise `maxConcurrentPods` to your node count on multi-node clusters. Tune `worker.dynamic.resources` if jobs OOM or stay Pending.
+
 The chart includes:
 
 - Server Deployment + Service + RBAC (Job pod creation)

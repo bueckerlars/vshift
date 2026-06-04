@@ -3,6 +3,7 @@ from uuid import uuid4
 from kubernetes import client  # pyright: ignore[reportMissingTypeStubs]
 
 from vshift.application.common.settings import Settings
+from vshift.infrastructure.kubernetes.resources import to_v1_resource_requirements
 
 WORKER_APP_LABEL = "vshift"
 WORKER_COMPONENT_LABEL = "worker"
@@ -34,6 +35,7 @@ class K8sWorkerPodFactory:
             command=["vshift-worker"],
             env=self._worker_env(),
             volume_mounts=self._volume_mounts(),
+            resources=to_v1_resource_requirements(k8s.worker_resources),
         )
 
         pod_spec = client.V1PodSpec(
@@ -69,6 +71,7 @@ class K8sWorkerPodFactory:
             "VSHIFT__CONFIG__FILE": f"{self._k8s.config_mount_path}/vshift.yaml",
             "VSHIFT__WORKER__ONE_SHOT": "true",
             "VSHIFT__LOGGING__LEVEL": app.logging.level,
+            "VSHIFT__FFMPEG__THREAD_COUNT": str(app.ffmpeg.thread_count or 2),
         }
         return [
             client.V1EnvVar(name=name, value=value)

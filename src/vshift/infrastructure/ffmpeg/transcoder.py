@@ -36,10 +36,12 @@ class FfmpegTranscoder:
         command_builder: FfmpegCommandBuilder | None = None,
         probe: FfmpegProbe | None = None,
         temp_dir: Path | None = None,
+        thread_count: int | None = None,
     ) -> None:
         self._paths = paths or FfmpegPaths()
         self._command_builder = command_builder or FfmpegCommandBuilder(
-            paths=self._paths
+            paths=self._paths,
+            thread_count=thread_count,
         )
         self._probe = probe or FfmpegProbe(self._paths)
         self._temp_dir = temp_dir

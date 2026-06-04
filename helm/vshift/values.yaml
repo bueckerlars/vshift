@@ -9,12 +9,22 @@ redis:
   password: vshift
   database: 1
 
+ffmpeg:
+  # 4 cores/node: leave headroom for demux, audio, and kube/system.
+  threads: 2
+
 server:
   replicas: 1
   serviceAccount:
     create: true
     name: vshift-server
-  resources: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 250m
+      memory: 384Mi
   service:
     type: ClusterIP
     port: 8000
@@ -23,12 +33,26 @@ worker:
   mode: dynamic
   dynamic:
     enabled: true
-    maxConcurrentPods: 5
+    # One 4K libx265 job per 8 GiB / 4 CPU node; raise to node count if multi-node.
+    maxConcurrentPods: 1
     ttlSecondsAfterFinished: 3600
+    resources:
+      requests:
+        cpu: 1500m
+        memory: 3Gi
+      limits:
+        cpu: "3"
+        memory: 5Gi
   static:
     enabled: false
     replicas: 0
-    resources: {}
+    resources:
+      requests:
+        cpu: 1500m
+        memory: 3Gi
+      limits:
+        cpu: "3"
+        memory: 5Gi
 
 kubernetes:
   namespace: default

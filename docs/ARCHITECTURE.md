@@ -723,9 +723,10 @@ worker:
   mode: dynamic                   # dynamic | static | both
   dynamic:
     enabled: true
-    maxConcurrentPods: 5
+    maxConcurrentPods: 1
     resources:
-      requests: { cpu: "2", memory: "4Gi" }
+      requests: { cpu: "1500m", memory: "3Gi" }
+      limits: { cpu: "3", memory: "5Gi" }
   static:
     replicas: 0                   # disabled by default
 

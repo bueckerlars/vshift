@@ -64,6 +64,10 @@ class RedisConnectionSettings(BaseModel):
 class FfmpegSettings(BaseModel):
     ffmpeg_path: str = Field(default="ffmpeg", description="Path to ffmpeg binary")
     ffprobe_path: str = Field(default="ffprobe", description="Path to ffprobe binary")
+    thread_count: PositiveInt | None = Field(
+        default=2,
+        description="FFmpeg -threads cap; reduces CPU oversubscription on workers",
+    )
 
 
 class ConfigSettings(BaseModel):
@@ -107,6 +111,32 @@ class ServerRuntimeSettings(BaseModel):
     worker_scale_interval_seconds: PositiveInt = Field(default=15)
 
 
+class K8sResourceSpec(BaseModel):
+    cpu: str | None = Field(default=None)
+    memory: str | None = Field(default=None)
+
+    def to_dict(self) -> dict[str, str]:
+        values: dict[str, str] = {}
+        if self.cpu is not None:
+            values["cpu"] = self.cpu
+        if self.memory is not None:
+            values["memory"] = self.memory
+        return values
+
+
+class K8sContainerResources(BaseModel):
+    requests: K8sResourceSpec = Field(default_factory=K8sResourceSpec)
+    limits: K8sResourceSpec = Field(default_factory=K8sResourceSpec)
+
+
+def _default_worker_resources() -> K8sContainerResources:
+    # Sized for ~8 GiB RAM / 4 CPU nodes (one 4K transcode per node).
+    return K8sContainerResources(
+        requests=K8sResourceSpec(cpu="1500m", memory="3Gi"),
+        limits=K8sResourceSpec(cpu="3", memory="5Gi"),
+    )
+
+
 class KubernetesSettings(BaseModel):
     """Kubernetes integration for dynamic worker Job pods."""
 
@@ -115,7 +145,16 @@ class KubernetesSettings(BaseModel):
     in_cluster: bool = Field(default=True)
     worker_image: str = Field(default="ghcr.io/bueckerlars/vshift:latest", min_length=1)
     worker_image_pull_policy: str = Field(default="IfNotPresent")
-    max_concurrent_pods: PositiveInt = Field(default=5)
+    max_concurrent_pods: PositiveInt = Field(
+        default=1,
+        description=(
+            "Max simultaneous worker Job pods; use node count on multi-node clusters"
+        ),
+    )
+    worker_resources: K8sContainerResources = Field(
+        default_factory=_default_worker_resources,
+        description="CPU/memory requests and limits for dynamic worker Job pods",
+    )
     worker_service_account: str = Field(default="vshift-worker", min_length=1)
     job_ttl_seconds_after_finished: PositiveInt = Field(default=3600)
     input_volume_claim: str | None = Field(default=None)

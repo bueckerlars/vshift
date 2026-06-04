@@ -16,10 +16,13 @@ class FfmpegCommandBuilder:
         encoder_resolver: EncoderResolver | None = None,
         profile_mapper: ProfileMapper | None = None,
         paths: FfmpegPaths | None = None,
+        *,
+        thread_count: int | None = None,
     ) -> None:
         self._paths = paths or FfmpegPaths()
         self._encoder_resolver = encoder_resolver or EncoderResolver(self._paths)
         self._profile_mapper = profile_mapper or ProfileMapper()
+        self._thread_count = thread_count
 
     def resolve_encoder(self, job: TranscodeJob) -> VideoEncoder:
         return self._encoder_resolver.resolve(job.profile_snapshot.video)
@@ -47,6 +50,8 @@ class FfmpegCommandBuilder:
             "-nostdin",
             "-y",
         ]
+        if self._thread_count is not None and self._thread_count > 0:
+            command.extend(["-threads", str(self._thread_count)])
         command.extend(mapped.input_args)
         command.extend(["-i", str(job.input_path)])
         command.extend(mapped.maps)

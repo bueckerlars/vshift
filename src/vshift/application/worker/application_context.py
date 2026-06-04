@@ -32,6 +32,7 @@ class WorkerApplicationContext(ApplicationContext):
         return FfmpegTranscoder(
             paths=paths,
             temp_dir=config.directories.temp,
+            thread_count=self.settings.ffmpeg.thread_count,
         )
 
     @cached_property

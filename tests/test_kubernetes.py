@@ -57,6 +57,15 @@ def test_worker_pod_factory_builds_one_shot_job(settings: Settings) -> None:
     env = {item.name: item.value for item in container.env or []}
     assert env["VSHIFT__WORKER__ONE_SHOT"] == "true"
     assert env["VSHIFT__REDIS__HOST"] == settings.redis.host
+    assert env["VSHIFT__FFMPEG__THREAD_COUNT"] == "2"
+
+    assert container.resources is not None
+    assert container.resources.requests is not None
+    assert container.resources.limits is not None
+    assert container.resources.requests["cpu"] == "1500m"
+    assert container.resources.requests["memory"] == "3Gi"
+    assert container.resources.limits["cpu"] == "3"
+    assert container.resources.limits["memory"] == "5Gi"
 
     volume_names = {mount.name for mount in container.volume_mounts or []}
     assert volume_names == {"config", "input", "output", "temp"}
@@ -109,6 +118,13 @@ class StubTaskQueue:
 
 
 def test_ensure_worker_capacity_launches_pods(settings: Settings) -> None:
+    settings = settings.model_copy(
+        update={
+            "kubernetes": settings.kubernetes.model_copy(
+                update={"max_concurrent_pods": 5},
+            ),
+        },
+    )
     launcher = StubWorkerPodLauncher(active=1)
     use_case = EnsureWorkerCapacity(
         settings,

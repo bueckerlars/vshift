@@ -249,6 +249,20 @@ def test_command_builder_maps_mkv_to_matroska_muxer() -> None:
     assert command[format_index + 1] == "matroska"
 
 
+def test_command_builder_adds_thread_limit_when_configured() -> None:
+    builder = FfmpegCommandBuilder(
+        encoder_resolver=EncoderResolver(available_encoders={"libx264"}),
+        thread_count=4,
+    )
+    command = builder.build(
+        _sample_job(_sample_profile(encoder=VideoEncoder.LIBX264)),
+        output_path=Path("/data/temp/job.partial.mp4"),
+    )
+
+    threads_index = command.index("-threads")
+    assert command[threads_index + 1] == "4"
+
+
 def test_command_builder_assembles_ffmpeg_argv() -> None:
     builder = FfmpegCommandBuilder(
         encoder_resolver=EncoderResolver(available_encoders={"libx264"}),

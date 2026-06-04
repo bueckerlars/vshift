@@ -50,6 +50,16 @@ spec:
               value: {{ include "vshift.image" . | quote }}
             - name: VSHIFT__KUBERNETES__MAX_CONCURRENT_PODS
               value: {{ .Values.worker.dynamic.maxConcurrentPods | quote }}
+            - name: VSHIFT__FFMPEG__THREAD_COUNT
+              value: {{ .Values.ffmpeg.threads | quote }}
+            - name: VSHIFT__KUBERNETES__WORKER_RESOURCES__REQUESTS__CPU
+              value: {{ .Values.worker.dynamic.resources.requests.cpu | quote }}
+            - name: VSHIFT__KUBERNETES__WORKER_RESOURCES__REQUESTS__MEMORY
+              value: {{ .Values.worker.dynamic.resources.requests.memory | quote }}
+            - name: VSHIFT__KUBERNETES__WORKER_RESOURCES__LIMITS__CPU
+              value: {{ .Values.worker.dynamic.resources.limits.cpu | quote }}
+            - name: VSHIFT__KUBERNETES__WORKER_RESOURCES__LIMITS__MEMORY
+              value: {{ .Values.worker.dynamic.resources.limits.memory | quote }}
             - name: VSHIFT__KUBERNETES__WORKER_SERVICE_ACCOUNT
               value: vshift-worker
             - name: VSHIFT__KUBERNETES__CONFIG_MAP_NAME

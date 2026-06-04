@@ -44,7 +44,10 @@ class ApplicationContext:
             ffmpeg=self.settings.ffmpeg.ffmpeg_path,
             ffprobe=self.settings.ffmpeg.ffprobe_path,
         )
-        return FfmpegTranscoder(paths=paths)
+        return FfmpegTranscoder(
+            paths=paths,
+            thread_count=self.settings.ffmpeg.thread_count,
+        )
 
     def log_settings(self) -> None:
         table = Table(show_header=True, header_style="bold")
