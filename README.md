@@ -188,7 +188,7 @@ Build the image:
 docker build -t ghcr.io/bueckerlars/vshift:latest .
 ```
 
-Release images are published to `ghcr.io/bueckerlars/vshift` when a Git tag is pushed.
+Release images are published to `ghcr.io/bueckerlars/vshift` for `linux/amd64` and `linux/arm64` when a Git tag is pushed.
 
 Pull a release image:
 
