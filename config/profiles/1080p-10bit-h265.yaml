@@ -1,0 +1,36 @@
+name: "1080p 10-bit H.265 (CPU)"
+description: "HQ 1080p 10-bit x265 CPU encode"
+format: mkv
+video:
+  codec: h265
+  encoder: libx265
+  bit_depth: 10
+  framerate_mode: cfr
+  width: 1920
+  height: 1080
+  quality_mode: constant
+  quality: 22.0
+  encoder_preset: slower
+  encoder_profile: main10
+  encoder_level: "5.1"
+  multi_pass: true
+audio_tracks:
+  - codec: copy
+    bit_rate: 160
+    mixdown: stereo
+    copy_track: true
+audio_selection_mode: all
+audio_language_list: [deu, eng]
+audio_passthrough: true
+subtitle_selection_mode: all
+subtitle_language_list: [deu, eng]
+subtitle_passthrough: true
+subtitle_tracks:
+  - language: deu
+    codec: copy
+    copy_track: true
+    is_default: true
+  - language: eng
+    codec: copy
+    copy_track: true
+chapter_markers: false

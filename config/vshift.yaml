@@ -12,46 +12,60 @@ directories:
   temp: data/temp
 
 profiles:
-  h264_1080p:
-    name: "H.264 1080p"
-    format: mp4
-    video:
-      codec: h264
-      encoder: auto
-      quality_mode: constant
-      quality: 22.0
-      width: 1920
-      height: 1080
-    audio_tracks:
-      - codec: aac
-        bit_rate: 160
-        mixdown: stereo
-
-  h264_720p:
-    name: "H.264 720p"
-    format: mp4
-    video:
-      codec: h264
-      encoder: auto
-      quality_mode: constant
-      quality: 23.0
-      width: 1280
-      height: 720
+  4k-10Bit-H265:
+    $ref: profiles/4k-10bit-h265.yaml
+  4k-8Bit-SDR-H265:
+    $ref: profiles/4k-8bit-sdr-h265.yaml
+  1080p-10Bit:
+    $ref: profiles/1080p-10bit-h265.yaml
+  1080p-8Bit:
+    $ref: profiles/1080p-8bit-h265.yaml
 
 rules:
-  - id: movies_1080p
+  - id: 4k_hdr_10bit
     priority: 10
     match:
-      extensions: [mkv, mp4]
-      min_width: 1280
-      max_width: 1920
-      filename_glob: "*.mkv"
-    profile: h264_1080p
+      extensions: [mkv, mp4, m4v, ts]
+      min_height: 2160
+      min_bit_depth: 10
+      hdr: true
+    profile: 4k-10Bit-H265
 
-  - id: small_files
+  - id: 4k_sdr_8bit
     priority: 20
     match:
-      extensions: [mp4]
-      max_width: 1280
-      filename_glob: "*"
-    profile: h264_720p
+      extensions: [mkv, mp4, m4v, ts]
+      min_height: 2160
+      max_bit_depth: 8
+    profile: 4k-8Bit-SDR-H265
+
+  - id: 4k_10bit_sdr
+    priority: 25
+    match:
+      extensions: [mkv, mp4, m4v, ts]
+      min_height: 2160
+      min_bit_depth: 10
+      hdr: false
+    profile: 4k-10Bit-H265
+
+  - id: 1080p_10bit
+    priority: 30
+    match:
+      extensions: [mkv, mp4, m4v, ts]
+      max_height: 1080
+      min_bit_depth: 10
+    profile: 1080p-10Bit
+
+  - id: 1080p_8bit
+    priority: 40
+    match:
+      extensions: [mkv, mp4, m4v, ts]
+      max_height: 1080
+    profile: 1080p-8Bit
+
+  - id: 4k_fallback
+    priority: 50
+    match:
+      extensions: [mkv, mp4, m4v, ts]
+      min_height: 2160
+    profile: 4k-8Bit-SDR-H265

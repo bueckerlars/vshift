@@ -124,6 +124,8 @@ def _video_encoder_tuning_args(
         args.extend(["-preset", video.encoder_preset])
         if video.encoder_tune:
             args.extend(["-tune", video.encoder_tune])
+    elif video_encoder == VideoEncoder.LIBX265:
+        args.extend(["-preset", video.encoder_preset])
     elif video_encoder in {
         VideoEncoder.H264_NVENC,
         VideoEncoder.HEVC_NVENC,

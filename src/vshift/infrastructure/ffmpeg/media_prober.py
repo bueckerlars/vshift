@@ -19,5 +19,7 @@ class FfmpegMediaProber:
             extension=extension,
             width=media.width,
             height=media.height,
+            bit_depth=media.bit_depth,
+            hdr=media.hdr,
             duration_seconds=media.duration_seconds,
         )

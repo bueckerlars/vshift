@@ -44,6 +44,7 @@ class HandBrakeImporter:
         "mp4": "mp4",
         "av_mp4": "mp4",
         "mkv": "mkv",
+        "av_mkv": "mkv",
         "webm": "webm",
         "avi": "avi",
         "mov": "mov",
@@ -228,7 +229,7 @@ class HandBrakeImporter:
 
     def _parse_audio_track(self, entry: dict[str, Any]) -> AudioTrack:
         encoder = str(entry.get("AudioEncoder", "aac"))
-        copy_track = encoder.startswith("copy:")
+        copy_track = encoder == "copy" or encoder.startswith("copy:")
         codec = encoder.removeprefix("copy:") if copy_track else encoder
 
         samplerate_raw = entry.get("AudioSamplerate", "auto")

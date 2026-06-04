@@ -16,6 +16,12 @@ class MatchCriteria(BaseModel):
     max_width: int | None = Field(default=None, ge=1)
     min_height: int | None = Field(default=None, ge=1)
     max_height: int | None = Field(default=None, ge=1)
+    min_bit_depth: int | None = Field(default=None, ge=8, le=12)
+    max_bit_depth: int | None = Field(default=None, ge=8, le=12)
+    hdr: bool | None = Field(
+        default=None,
+        description="Require HDR (true) or SDR (false) signaling when set",
+    )
     filename_glob: str | None = Field(
         default=None,
         description="Glob pattern matched against the filename",
@@ -43,6 +49,12 @@ class MatchCriteria(BaseModel):
             and self.min_height > self.max_height
         ):
             raise VShiftException("min_height cannot exceed max_height")
+        if (
+            self.min_bit_depth is not None
+            and self.max_bit_depth is not None
+            and self.min_bit_depth > self.max_bit_depth
+        ):
+            raise VShiftException("min_bit_depth cannot exceed max_bit_depth")
         return self
 
     def matches(self, probed: ProbedInput) -> bool:
@@ -55,11 +67,19 @@ class MatchCriteria(BaseModel):
             return False
         if not self._matches_dimension(probed.width, self.min_width, self.max_width):
             return False
-        return self._matches_dimension(
+        if not self._matches_dimension(
             probed.height,
             self.min_height,
             self.max_height,
-        )
+        ):
+            return False
+        if not self._matches_dimension(
+            probed.bit_depth,
+            self.min_bit_depth,
+            self.max_bit_depth,
+        ):
+            return False
+        return self._matches_hdr(probed.hdr, self.hdr)
 
     @staticmethod
     def _matches_dimension(
@@ -74,6 +94,14 @@ class MatchCriteria(BaseModel):
         if minimum is not None and value < minimum:
             return False
         return not (maximum is not None and value > maximum)
+
+    @staticmethod
+    def _matches_hdr(value: bool | None, expected: bool | None) -> bool:
+        if expected is None:
+            return True
+        if value is None:
+            return False
+        return value == expected
 
 
 class MatchRule(BaseModel):

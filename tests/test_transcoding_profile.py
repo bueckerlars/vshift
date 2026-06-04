@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import pytest
 
@@ -132,6 +133,38 @@ def test_vshift_profile_serializes_native_json() -> None:
     assert dumped["name"] == "Fast 1080p30"
     assert dumped["video"]["codec"] == "h264"
     assert "PresetName" not in dumped
+
+
+def test_parse_handbrake_audio_copy_encoder() -> None:
+    data = json.loads(HAND_BRAKE_LEAF)
+    data["AudioList"] = [
+        {
+            "AudioBitrate": 160,
+            "AudioEncoder": "copy",
+            "AudioMixdown": "stereo",
+            "AudioSamplerate": "auto",
+        }
+    ]
+
+    profile = IMPORTER.parse_preset(data)
+    assert profile.audio_tracks[0].copy_track is True
+    assert profile.audio_tracks[0].codec == "copy"
+
+
+def test_parse_handbrake_4k_hdr_preset_from_fixture() -> None:
+    fixture = Path(__file__).parent / "fixtures" / "handbrake" / "hq_4k_hdr_10bit.json"
+    profiles = IMPORTER.parse_presets_from_file(fixture)
+    profile = profiles[0]
+
+    assert profile.format == "mkv"
+    assert profile.video.codec == "h265"
+    assert profile.video.bit_depth == 10
+    assert profile.video.width == 3840
+    assert profile.video.height == 2160
+    assert profile.video.encoder_profile == "main10"
+    assert profile.video.encoder_preset == "slower"
+    assert profile.video.quality == 22.0
+    assert profile.audio_tracks[0].copy_track is True
 
 
 def test_average_bitrate_quality_mode() -> None:

@@ -8,6 +8,8 @@ class MediaProbe:
     video_codec: str | None
     width: int | None
     height: int | None
+    bit_depth: int | None
+    hdr: bool | None
 
 
 @dataclass(frozen=True, slots=True)

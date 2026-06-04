@@ -12,6 +12,7 @@ from vshift.domain.config import (
 from vshift.domain.file.probed_input import ProbedInput
 from vshift.domain.transcoding_profile import QualityMode, VideoEncoder, VshiftProfile
 from vshift.exception import VShiftException
+from vshift.infrastructure.filesystem.yaml_config_loader import YamlConfigLoader
 
 EXAMPLE_CONFIG_PATH = Path(__file__).parent.parent / "config" / "vshift.example.yaml"
 
@@ -211,6 +212,50 @@ def test_vshift_config_rejects_duplicate_rule_ids() -> None:
                 },
             ]
         )
+
+
+def test_match_rule_bit_depth_and_hdr() -> None:
+    rule = MatchRule.model_validate(
+        {
+            "id": "4k_hdr",
+            "match": {
+                "min_height": 2160,
+                "min_bit_depth": 10,
+                "hdr": True,
+            },
+            "profile": "4k-10Bit-H265",
+        }
+    )
+    assert rule.matches(
+        ProbedInput(
+            path=Path("/data/input/movie.mkv"),
+            extension="mkv",
+            width=3840,
+            height=2160,
+            bit_depth=10,
+            hdr=True,
+        )
+    )
+    assert not rule.matches(
+        ProbedInput(
+            path=Path("/data/input/movie.mkv"),
+            extension="mkv",
+            width=3840,
+            height=2160,
+            bit_depth=10,
+            hdr=False,
+        )
+    )
+
+
+def test_default_config_loads_h265_profiles() -> None:
+    config_path = Path(__file__).parent.parent / "config" / "vshift.yaml"
+    config = YamlConfigLoader().load(config_path)
+
+    assert "4k-10Bit-H265" in config.profiles
+    assert config.profiles["4k-10Bit-H265"].video.encoder == VideoEncoder.LIBX265
+    assert config.profiles["4k-10Bit-H265"].video.bit_depth == 10
+    assert config.profiles["1080p-8Bit"].video.height == 1080
 
 
 def test_example_yaml_loads_into_vshift_config() -> None:

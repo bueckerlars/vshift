@@ -96,6 +96,10 @@ def test_probe_maps_typed_ffprobe_result(tmp_path: Path) -> None:
                     codec_name="h264",
                     width=1920,
                     height=1080,
+                    pix_fmt="yuv420p",
+                    color_transfer="bt709",
+                    color_primaries="bt709",
+                    side_data_list=None,
                 ),
             ),
         ),
@@ -109,6 +113,8 @@ def test_probe_maps_typed_ffprobe_result(tmp_path: Path) -> None:
     assert result.video_codec == "h264"
     assert result.width == 1920
     assert result.height == 1080
+    assert result.bit_depth == 8
+    assert result.hdr is False
 
 
 def test_probe_wraps_ffprobe_execute_error(tmp_path: Path) -> None:
@@ -158,6 +164,28 @@ def test_probe_integration_with_real_ffprobe(tmp_path: Path) -> None:
     assert result.video_codec == "h264"
     assert result.width == 128
     assert result.height == 72
+
+
+def test_profile_mapper_applies_libx265_preset() -> None:
+    profile = VshiftProfile.model_validate(
+        {
+            "name": "HEVC",
+            "format": "mkv",
+            "video": {
+                "codec": "h265",
+                "encoder": "libx265",
+                "quality_mode": "constant",
+                "quality": 22.0,
+                "encoder_preset": "slower",
+                "bit_depth": 10,
+            },
+        }
+    )
+    mapped = ProfileMapper().map_profile(profile, video_encoder=VideoEncoder.LIBX265)
+
+    assert "-preset" in mapped.video_args
+    assert "slower" in mapped.video_args
+    assert "yuv420p10le" in mapped.video_args
 
 
 def test_command_builder_assembles_ffmpeg_argv() -> None:
